@@ -4,8 +4,12 @@ import rtde_control
 import rtde_receive
 import numpy as np
 import gc
+import argparse
 
-IP_ADDRESS = "172.28.60.3"
+# UR10e 17.28.60.3
+# URSIM 192.168.56.101
+
+IP_ADDRESS = "192.168.56.101"
 SPEED = 0.5
 ACCELERATION = 1.2
 
@@ -16,10 +20,10 @@ class UrHandler:
     def __init__(self):
         self.receive_handler = rtde_receive.RTDEReceiveInterface(IP_ADDRESS)
         self.control_handler = rtde_control.RTDEControlInterface(IP_ADDRESS)
-        self.orienatations = [[np.pi, 0, 0],
-                              [2.261, -2.182, 0],
-                              [0, np.pi, 0],
-                              [2.182, 2.261, 0]]
+        self.orientations = [[np.pi, 0, 0],
+                             [2.261, -2.182, 0],
+                             [0, np.pi, 0],
+                             [2.182, 2.261, 0]]
     def get_position(self):
         x_m, y_m, z_m, rx_rad, ry_rad, rz_rad = self.receive_handler.getActualTCPPose()
 
@@ -51,8 +55,21 @@ class Corner:
     
 
 def main() -> None:
+
+    parser = argparse.ArgumentParser(description="UR10e Robot Controller")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # Subparser for get_position command
+    subparsers.add_parser("get_position", help="Get the current position of the robot")
+
+    args = parser.parse_args()
+
     ur_handle = UrHandler()
     x_m, y_m, z_m, rx_rad, ry_rad, rz_rad = ur_handle.get_position()
+
+    if args.command == "get_position":
+        position = ur_handle.get_position()
+        print(f"Current position: {position}")
 
     # Create corners
     c1 = Corner(x=0.6621265919871204, 
@@ -115,15 +132,15 @@ def main() -> None:
             obj.z = obj.z + z_off
         
     ur_handle.move_to_corner(c4)
-    ur_handle.orient_to_corner(ur_handle.orienatations[1])
+    ur_handle.orient_to_corner(ur_handle.orientations[1])
     ur_handle.move_to_corner(c12)
-    ur_handle.orient_to_corner(ur_handle.orienatations[2])
+    ur_handle.orient_to_corner(ur_handle.orientations[2])
     ur_handle.move_to_corner(c1)
     ur_handle.move_to_corner(c2)
-    ur_handle.orient_to_corner(ur_handle.orienatations[3])
+    ur_handle.orient_to_corner(ur_handle.orientations[3])
     ur_handle.move_to_corner(c22)
     ur_handle.move_to_corner(c3)
-    ur_handle.orient_to_corner(ur_handle.orienatations[0])
+    ur_handle.orient_to_corner(ur_handle.orientations[0])
     ur_handle.move_to_corner(c32)
     ur_handle.move_to_corner(c42)
     
@@ -133,10 +150,10 @@ def main() -> None:
     
     ur_handle.move_to_corner(c5)
 
-    ur_handle.orient_to_corner(ur_handle.orienatations[3])
+    ur_handle.orient_to_corner(ur_handle.orientations[3])
 
-    ur_handle.orient_to_corner(ur_handle.orienatations[2])
-    ur_handle.orient_to_corner(ur_handle.orienatations[1])
+    ur_handle.orient_to_corner(ur_handle.orientations[2])
+    ur_handle.orient_to_corner(ur_handle.orientations[1])
     
 
    

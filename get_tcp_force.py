@@ -1,20 +1,19 @@
-####
 # returns force and torque values in tool coordinate system
-####
+
 # reference variables are saved as pose variable to be used for pose_trans()
-##
+
 # force_T: force values (Fx, Fy, Fz) in tool coordinate system at tcp position as origin
 # torque_T: torque values (Tx, Ty, Tz) in tool coordinate system at tcp position as origin
 # force_B: force values (Fx, Fy, Fz) in base coordinate system at tcp position as origin
 # torque_B: torque values (Tx, Ty, Tz) in base coordinate system at tcp position as origin
 # tcp: tcp position and tcp orientation
 # rotation_BT: Tool orientation
-####
+
 # mathematic calcluation
-##
+
 # force_B = rotation_BT * force_T
 # => force_T = inv(rotation_BT) * force_B
-####
+
 
 import rtde_control
 import rtde_receive

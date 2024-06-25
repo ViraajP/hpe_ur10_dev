@@ -3,21 +3,24 @@ import numpy as np
 from scipy import signal
 import pandas as pd
 import matplotlib
-matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
+
+matplotlib.use('Qt5Agg')
 
 
 def find_peaks(pos, data):
     # find peaks from data
-    
+
     peaks = signal.find_peaks(data, prominence=4.5)
     return peaks
 
+
 def detrend_data(pos, data):
     # remove trend from data
-    
+
     det_data = signal.detrend(data)
     return det_data
+
 
 def get_mean_distance(pos, peaks):
     # calculate mean distance between peaks
@@ -27,13 +30,14 @@ def get_mean_distance(pos, peaks):
     mean_distance = np.mean(dist)
     return mean_distance
 
+
 def select_file():
     filename = 'test_log6.csv'
     fp = os.path.join(os.getcwd(), filename)
     if not os.path.isfile(fp):
-        print('File not found.')
-        return select_file()
+        raise FileNotFoundError("File not found.")
     return fp
+
 
 file_path = select_file()
 
@@ -50,13 +54,11 @@ if not all(col in df.columns for col in expected_columns):
     exit()
 print("df loaded successfully with expected columns:", expected_columns)
 
-
 base_X = 0
 base_Y = 0
 base_Z = 0
 start_time = 0
 end_time = 20
-
 
 time = df.timestamp.values.tolist()
 time = np.array(time)
@@ -97,7 +99,6 @@ for plot in plots:
     plt.grid(True)
     plt.autoscale(enable=True, axis='y')
     plt.show()
-
 
 # X = np.array(df.actual_TCP_force_0.tolist())
 # Y = np.array(df.actual_TCP_force_1.tolist())
