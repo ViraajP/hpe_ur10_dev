@@ -16,6 +16,7 @@ IP_ADDRESS = "172.28.60.3"
 OUTPUT_FILENAME = "robot_data.csv"
 FREQUENCY = 500.0
 
+
 def plot_log(filename):
     df = pd.read_csv(filename)
 
@@ -45,6 +46,7 @@ def plot_log(filename):
     plt.title('Force over time Z')
     plt.savefig('force_z_plot.png')  # Save the plot to a file
     plt.close()
+
 
 def plot_ft(filename):
     df = pd.read_csv(filename)
@@ -93,6 +95,7 @@ def plot_ft(filename):
     plt.legend()
     plt.show()
 
+
 def plot_ft_live(filename):
     def update_plot(filename):
         df = pd.read_csv(filename)
@@ -112,6 +115,7 @@ def plot_ft_live(filename):
         plt.ion()  # Enable interactive mode
     update_plot(filename)
     plt.pause(0.01)  # Pause for a short time to allow plot to update
+
 
 def main():
     """Main entry point."""

@@ -11,6 +11,7 @@ import argparse
 IP_ADDRESS = "192.168.56.101"
 SPEED = 0.5
 ACCELERATION = 1.2
+ft_offset = [0, 0, 0, 0, 0, 0]
 
 
 class UrHandler:
@@ -27,10 +28,33 @@ class UrHandler:
         x_m, y_m, z_m, rx_rad, ry_rad, rz_rad = self.receive_handler.getActualTCPPose()
         return x_m, y_m, z_m, rx_rad, ry_rad, rz_rad
 
+    def get_tcp_force_offsets(self):
+        global ft_offset
+        ft_offset = self.receive_handler.getActualTCPForce()
+
+    def calibrate_tcp_force(self):
+        global ft_offset
+        raw_force = self.receive_handler.getActualTCPForce()
+        calibrated_force = [raw_force[i] - ft_offset[i] for i in range(6)]
+        return calibrated_force
+
     def move_to_position(self, x_m, y_m, z_m, rx_rad, ry_rad, rz_rad):
         self.control_handler.moveL([x_m, y_m, z_m, rx_rad, ry_rad, rz_rad], SPEED, ACCELERATION)
 
     def f_move_1d(self, direction=None, force_threshold=10, step=0.001):
+        """
+        Move in a Cartesian direction until the force measured at the tool center point (TCP) reaches the specified
+        threshold.
+
+        :param direction: Direction to move in ('x', 'y', 'z')
+        :param force_threshold: Force threshold to trigger the stop in Newtons
+        :param step: Step size in meters
+
+        Example:
+        ur_handler.f_move_1d(direction='z', force_threshold=5, step=0.0005)
+        Moves the robot in the z-direction until the force in the z-direction exceeds 5 Newtons, with each step being
+        0.0005 meters.
+        """
         direction = direction.lower()
         assert direction in ['x', 'y', 'z'], "Direction must be one of 'x', 'y', 'z'"
         direction_index = {'x': 0, 'y': 1, 'z': 2}[direction]
@@ -43,6 +67,18 @@ class UrHandler:
             self.move_to_position(*current_position[:3], *current_position[3:])
 
     def f_move_2d(self, move_direction, move_distance, force_direction, force_magnitude):
+        """
+        Combination move, specifying both the direction to move in and the direction to apply force in.
+
+        :param move_direction: Direction to move in ('x', 'y', 'z')
+        :param move_distance: Distance to move in meters
+        :param force_direction: Direction to apply force in ('x', 'y', 'z')
+        :param force_magnitude: Magnitude of force to apply in Newtons
+
+        Example:
+        ur_handler.f_move_2d(move_direction='x', move_distance=-0.1, force_direction='z', force_magnitude=10)
+        Moves the robot in the -x direction by 100 mm while applying a 10 N force in the z direction.
+        """
         move_direction = move_direction.lower()
         force_direction = force_direction.lower()
         assert move_direction in ['x', 'y', 'z'], "Move direction must be one of 'x', 'y', 'z'"
@@ -116,12 +152,13 @@ def main() -> None:
 
     ur_handle.move_to_position(p1.x, p1.y, p1.z, p1.rx, p1.ry, p1.rz)
 
+    ur_handle.calibrate_tcp_force()
+
     # Move down until contact
     ur_handle.f_move_1d(direction='z', force_threshold=10, step=0.001)
 
     # Move in -x direction for 100 mm while applying 10N in z
     ur_handle.f_move_2d(move_direction='x', move_distance=-0.1, force_direction='z', force_magnitude=10)
-
 
 
 if __name__ == '__main__':
